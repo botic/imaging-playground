@@ -33,9 +33,32 @@ transform.resize(system.args[1], system.args[2], Math.pow(500, 2));
 
 var modb = require("./modb");
 
-if (system.args.length !== 2) {
+if (system.args.length < 2) {
    term.writeln("Insufficient arguments!");
    system.exit(1);
 }
 
 var db = modb.open(system.args[1]);
+
+if (system.args.length === 3) {
+   var file = fs.open(system.args[2], {
+      write: true,
+      binary: false
+   });
+
+   file.writeLine("@RELATION mediaobjects");
+   file.writeLine("@ATTRIBUTE value NUMERIC");
+   file.writeLine("@ATTRIBUTE class {positive,negative}");
+
+   var rand = new java.util.Random();
+
+   file.writeLine("@DATA");
+   db.positiveInstances.forEach(function(element) {
+      file.writeLine((5 + rand.nextGaussian()) + ",positive");
+   });
+   db.negativeInstances.forEach(function(element) {
+      file.writeLine((0 + Math.abs(rand.nextGaussian())) + ",negative");
+   });
+
+   file.close();
+}
