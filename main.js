@@ -5,6 +5,7 @@ var term = require("ringo/term");
 var viewer = require("./viewer");
 var convolution = require("./convolution");
 var transform = require("./transform");
+var weka = require("./weka-utils");
 
 /*
 if (system.args.length !== 3) {
@@ -41,24 +42,22 @@ if (system.args.length < 2) {
 var db = modb.open(system.args[1]);
 
 if (system.args.length === 3) {
-   var file = fs.open(system.args[2], {
-      write: true,
-      binary: false
-   });
+   var arffWriter = weka.getArffWriter(system.args[2]);
 
-   file.writeLine("@RELATION mediaobjects");
-   file.writeLine("@ATTRIBUTE value NUMERIC");
-   file.writeLine("@ATTRIBUTE class {positive,negative}");
+   arffWriter.open();
+   arffWriter.relation("pos-vs-neg");
+   arffWriter.numericAttr("amount");
+   arffWriter.nominalAttr("class", ["positive", "negative"]);
 
    var rand = new java.util.Random();
 
-   file.writeLine("@DATA");
+   arffWriter.data();
    db.positiveInstances.forEach(function(element) {
-      file.writeLine((5 + rand.nextGaussian()) + ",positive");
+      arffWriter.instance((5 + rand.nextGaussian()), "positive");
    });
    db.negativeInstances.forEach(function(element) {
-      file.writeLine((0 + Math.abs(rand.nextGaussian())) + ",negative");
+      arffWriter.instance((0 + Math.abs(rand.nextGaussian())), "negative");
    });
 
-   file.close();
+   arffWriter.close();
 }
