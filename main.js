@@ -47,16 +47,17 @@ if (system.args.length === 3) {
    arffWriter.open();
    arffWriter.relation("pos-vs-neg");
    arffWriter.numericAttr("amount");
+   arffWriter.numericAttr("price");
    arffWriter.nominalAttr("class", ["positive", "negative"]);
 
    var rand = new java.util.Random();
 
    arffWriter.data();
    db.positiveInstances.forEach(function(element) {
-      arffWriter.instance((5 + rand.nextGaussian()), "positive");
+      arffWriter.instance((7 + rand.nextGaussian()), rand.nextGaussian(), "positive");
    });
    db.negativeInstances.forEach(function(element) {
-      arffWriter.instance((0 + Math.abs(rand.nextGaussian())), "negative");
+      arffWriter.instance((0 + Math.abs(rand.nextGaussian())), rand.nextGaussian(), "negative");
    });
 
    arffWriter.close();
