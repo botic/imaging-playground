@@ -1,5 +1,7 @@
 importPackage(java.nio.file);
 
+var log = require("ringo/logging").getLogger(module.id);
+
 var createVisitor = function(files, positive, path) {
    return new JavaAdapter(java.nio.file.SimpleFileVisitor, {
       preVisitDirectory: function (dir, attrs) {
@@ -20,8 +22,8 @@ function Database (path) {
    this.positiveInstances = [];
    this.negativeInstances = [];
 
-   java.nio.file.Files.walkFileTree(FileSystems.getDefault().getPath(path), createVisitor(this.positiveInstances, true, FileSystems.getDefault().getPath(path)));
-   java.nio.file.Files.walkFileTree(FileSystems.getDefault().getPath(path), createVisitor(this.negativeInstances, false, FileSystems.getDefault().getPath(path)));
+   java.nio.file.Files.walkFileTree(FileSystems.getDefault().getPath(path), java.util.EnumSet.of(FileVisitOption.FOLLOW_LINKS), 10, createVisitor(this.positiveInstances, true, FileSystems.getDefault().getPath(path)));
+   java.nio.file.Files.walkFileTree(FileSystems.getDefault().getPath(path), java.util.EnumSet.of(FileVisitOption.FOLLOW_LINKS), 10, createVisitor(this.negativeInstances, false, FileSystems.getDefault().getPath(path)));
 
 };
 
