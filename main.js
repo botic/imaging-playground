@@ -28,6 +28,7 @@ if (system.args.length === 3) {
    arffWriter.numericAttr("meanhue");
    arffWriter.numericAttr("meansat");
    arffWriter.numericAttr("meanval");
+   arffWriter.numericAttr("meanlum");
    arffWriter.nominalAttr("class", ["positive", "negative"]);
 
    var rand = new java.util.Random();
@@ -35,22 +36,28 @@ if (system.args.length === 3) {
    arffWriter.data();
    db.positiveInstances.forEach(function(path) {
       proxy.eval("[h, s, v] = f1_mean_hsv('" + path + "')");
+      proxy.eval("[l] = f2_mean_lab('" + path + "')");
+
       var h = proxy.getVariable("h")[0];
       var s = proxy.getVariable("s")[0];
       var v = proxy.getVariable("v")[0];
+      var l = proxy.getVariable("l")[0];
 
       if (h >= 0 && s >= 0 && v >= 0) {
-         arffWriter.instance(h, s, v, "positive");
+         arffWriter.instance(h, s, v, l, "positive");
       }
    });
    db.negativeInstances.forEach(function(path) {
       proxy.eval("[h, s, v] = f1_mean_hsv('" + path + "')");
+      proxy.eval("[l] = f2_mean_lab('" + path + "')");
+
       var h = proxy.getVariable("h")[0];
       var s = proxy.getVariable("s")[0];
       var v = proxy.getVariable("v")[0];
+      var l = proxy.getVariable("l")[0];
 
       if (h >= 0 && s >= 0 && v >= 0) {
-         arffWriter.instance(h, s, v, "negative");
+         arffWriter.instance(h, s, v, l, "negative");
       }
    });
 
