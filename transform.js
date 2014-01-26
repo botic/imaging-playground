@@ -1,4 +1,4 @@
-addToClasspath("./lib/im4java.jar");
+addToClasspath("./jars/im4java.jar");
 importPackage(Packages.org.im4java.core);
 
 // Always use GraphicsMagick
