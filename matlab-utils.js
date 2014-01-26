@@ -40,15 +40,13 @@ addToClasspath("/Applications/MATLAB_R2013b.app/java/jar/webproxy.jar");
 addToClasspath("/Applications/MATLAB_R2013b.app/java/jar/widgets.jar");
 addToClasspath("/Applications/MATLAB_R2013b.app/java/jar/xml.jar");
 
-addToClasspath("./lib/matlabcontrol.jar")
+addToClasspath("./jars/matlabcontrol.jar")
 
 importPackage(Packages.matlabcontrol);
 
-var factory = new MatlabProxyFactory(MatlabProxyFactoryOptions.Builder().setHidden(true).build());
- var proxy = factory.getProxy();
+var log = require("ringo/logging").getLogger(module.id);
 
- //Display 'hello world' just like when using the demo
- proxy.eval("disp('hello world');");
-
- //Disconnect the proxy from MATLAB
- proxy.disconnect();
+var getProxy = exports.getProxy = function(hidden) {
+   var factory = new MatlabProxyFactory(MatlabProxyFactoryOptions.Builder().setHidden(hidden).build());
+   return factory.getProxy();
+};
