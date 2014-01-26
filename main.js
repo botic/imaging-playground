@@ -6,33 +6,12 @@ var viewer = require("./viewer");
 var convolution = require("./convolution");
 var transform = require("./transform");
 var weka = require("./weka-utils");
-
-/*
-if (system.args.length !== 3) {
-   term.writeln("Insufficient arguments!");
-   system.exit(1);
-}
-
-if (!fs.exists(system.args[1])) {
-   term.writeln("First parameter is the input image!");
-   system.exit(1);
-}
-
-transform.resize(system.args[1], system.args[2], Math.pow(500, 2));
-*/
-
-//var img = javax.imageio.ImageIO.read(new java.io.File(system.args[2]));
-
-/*viewer.viewImage(convolution.filter(img, [
-   [1,0,-1],
-   [2,0,-2],
-   [1,0,-1]
-]));
-*/
-
-//viewer.viewImage(img);
+var matlab = require("./matlab-utils");
 
 var modb = require("./modb");
+
+var proxy = matlab.getProxy(false);
+proxy.eval("addpath('" + module.resolve("./matlab") + "')");
 
 if (system.args.length < 2) {
    term.writeln("Insufficient arguments!");
@@ -45,20 +24,37 @@ if (system.args.length === 3) {
    var arffWriter = weka.getArffWriter(system.args[2]);
 
    arffWriter.open();
-   arffWriter.relation("pos-vs-neg");
-   arffWriter.numericAttr("amount");
-   arffWriter.numericAttr("price");
+   arffWriter.relation("mean-hue");
+   arffWriter.numericAttr("meanhue");
+   arffWriter.numericAttr("meansat");
+   arffWriter.numericAttr("meanval");
    arffWriter.nominalAttr("class", ["positive", "negative"]);
 
    var rand = new java.util.Random();
 
    arffWriter.data();
-   db.positiveInstances.forEach(function(element) {
-      arffWriter.instance((7 + rand.nextGaussian()), rand.nextGaussian(), "positive");
+   db.positiveInstances.forEach(function(path) {
+      proxy.eval("[h, s, v] = f1_mean_hsv('" + path + "')");
+      var h = proxy.getVariable("h")[0];
+      var s = proxy.getVariable("s")[0];
+      var v = proxy.getVariable("v")[0];
+
+      if (h >= 0 && s >= 0 && v >= 0) {
+         arffWriter.instance(h, s, v, "positive");
+      }
    });
-   db.negativeInstances.forEach(function(element) {
-      arffWriter.instance((0 + Math.abs(rand.nextGaussian())), rand.nextGaussian(), "negative");
+   db.negativeInstances.forEach(function(path) {
+      proxy.eval("[h, s, v] = f1_mean_hsv('" + path + "')");
+      var h = proxy.getVariable("h")[0];
+      var s = proxy.getVariable("s")[0];
+      var v = proxy.getVariable("v")[0];
+
+      if (h >= 0 && s >= 0 && v >= 0) {
+         arffWriter.instance(h, s, v, "negative");
+      }
    });
 
+   // Close Matlab and ARFF writer
+   proxy.disconnect();
    arffWriter.close();
 }
